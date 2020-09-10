@@ -1,0 +1,32 @@
+version: "3"
+services:
+  main:
+    build:
+      context: .
+      dockerfile: dev.Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - "./bin:/usr/src/app/bin"
+      - "./src:/usr/src/app/src"
+    environment:
+      DEV: "true"
+      PORT: "3000"
+      REDIS_URL: "redis://db:6379"
+    env_file: .env
+  ngrok:
+    image: wernight/ngrok
+    env_file: .ngrok.env
+    environment:
+      NGROK_PORT: main:3000
+    ports:
+      - "3001:4040"
+  db:
+    image: redis
+    command: redis-server --appendonly yes
+    volumes:
+      - db_volume:/data
+    ports:
+      - "3002:6379"
+volumes:
+  db_volume:
