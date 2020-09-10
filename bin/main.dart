@@ -12,6 +12,11 @@ main() async {
 
   var app = Angel();
 
+  app.errorHandler = (e, req, res) {
+    print(e);
+    print(e.stackTrace);
+  };
+
   app.get('/', (req, res) {
     res.write("Hello earth!");
   });
