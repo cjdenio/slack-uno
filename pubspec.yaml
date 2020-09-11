@@ -5,3 +5,4 @@ dependencies:
   http: ^0.12.2
   dartis: ^0.5.0
   uuid: ^2.2.2
+  crypto: ^2.1.5

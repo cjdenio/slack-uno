@@ -7,11 +7,28 @@ import '../db/db.dart' as db;
 import '../util/util.dart' as util;
 
 handleInteractivity(
-    RequestContext<dynamic> req, ResponseContext<dynamic> res) async {
-  var client = SlackClient(Platform.environment["SLACK_TOKEN"]);
+  RequestContext<dynamic> req,
+  ResponseContext<dynamic> res,
+) async {
+  List<int> rawBody = [];
 
-  await req.parseBody();
-  var body = json.decode(req.bodyAsMap["payload"]);
+  await for (var chunk in req.body) {
+    rawBody.addAll(chunk);
+  }
+
+  if (!util.verifySlackRequest(
+    req.headers.value("X-Slack-Request-Timestamp"),
+    rawBody,
+    req.headers.value("X-Slack-Signature"),
+  )) {
+    res.statusCode = 400;
+    res.write("Slack request not verified");
+    return;
+  }
+
+  var body = json.decode(Uri.splitQueryString(utf8.decode(rawBody))["payload"]);
+
+  var client = SlackClient(Platform.environment["SLACK_TOKEN"]);
 
   switch (body["type"]) {
     case "block_actions":
