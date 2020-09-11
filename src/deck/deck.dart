@@ -83,6 +83,21 @@ class Card {
         return "";
     }
   }
+
+  static String ColorToEmoji(Color color) {
+    switch (color) {
+      case Color.red:
+        return ":red_circle:";
+      case Color.green:
+        return ":green_heart:";
+      case Color.blue:
+        return ":large_blue_circle:";
+      case Color.yellow:
+        return ":yellow_heart:";
+      default:
+        return "";
+    }
+  }
 }
 
 enum Color { red, green, blue, yellow }

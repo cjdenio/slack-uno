@@ -135,6 +135,59 @@ class Game {
       await removeActiveGame(e.name);
     });
   }
+
+  playCard(String user, int cardIndex) async {
+    var hand = await getPlayerHand(user);
+    dynamic discard = json.decode(
+        await client.asCommands<String, String>().get("games:${game}:discard"));
+    discard = discard.map((e) => Card.fromJson(e)).toList();
+
+    var card = hand.removeAt(cardIndex);
+    discard.add(card);
+
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:discard", json.encode(discard));
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:players:${user}:hand", json.encode(hand));
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:activeColor", Card.ColorToString(card.color));
+
+    if (hand.length == 0) {
+      await setWinner(user);
+    }
+  }
+
+  setWinner(String winner) async {
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:winner", winner);
+  }
+
+  Future<String> getWinner() async {
+    return await client
+        .asCommands<String, String>()
+        .get("games:${game}:winner");
+  }
+
+  Future<Card> drawTopCard(String user) async {
+    var hand = await getPlayerHand(user);
+    dynamic draw = json.decode(
+        await client.asCommands<String, String>().get("games:${game}:draw"));
+    draw = draw.map((e) => Card.fromJson(e)).toList();
+
+    var drawn = draw.removeLast();
+    hand.add(drawn);
+
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:draw", json.encode(draw));
+    await client
+        .asCommands<String, String>()
+        .set("games:${game}:players:${user}:hand", json.encode(hand));
+  }
 }
 
 class Player {

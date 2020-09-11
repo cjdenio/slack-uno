@@ -14,47 +14,58 @@ handleInteractivity(
 
   switch (body["type"]) {
     case "block_actions":
-      switch (body["actions"][0]["action_id"]) {
-        case "start":
-          client.openView(body["trigger_id"], {
-            "type": "modal",
-            "callback_id": "start",
-            "title": {
-              "type": "plain_text",
-              "text": "Start Uno Game",
-            },
-            "blocks": [
-              {
-                "type": "input",
-                "block_id": "players",
-                "label": {
+      final action_id = body["actions"][0]["action_id"];
+
+      if (action_id == "start") {
+        client.openView(body["trigger_id"], {
+          "type": "modal",
+          "callback_id": "start",
+          "title": {
+            "type": "plain_text",
+            "text": "Start Uno Game",
+          },
+          "blocks": [
+            {
+              "type": "input",
+              "block_id": "players",
+              "label": {
+                "type": "plain_text",
+                "text": "Players",
+              },
+              "element": {
+                "type": "multi_users_select",
+                "action_id": "players",
+                "placeholder": {
                   "type": "plain_text",
-                  "text": "Players",
+                  "text": "Select some...",
                 },
-                "element": {
-                  "type": "multi_users_select",
-                  "action_id": "players",
-                  "placeholder": {
-                    "type": "plain_text",
-                    "text": "Select some...",
-                  },
-                  "max_selected_items": 9,
-                }
+                "max_selected_items": 9,
               }
-            ],
-            "submit": {
-              "type": "plain_text",
-              "text": "Start",
-            },
-            "close": {
-              "type": "plain_text",
-              "text": "Cancel",
             }
-          });
-          break;
-        case "end":
-          await db.Game(body["view"]["private_metadata"]).end();
-          await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
+          ],
+          "submit": {
+            "type": "plain_text",
+            "text": "Start",
+          },
+          "close": {
+            "type": "plain_text",
+            "text": "Cancel",
+          }
+        });
+      } else if (action_id == "end") {
+        await db.Game(body["view"]["private_metadata"]).end();
+        await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
+      } else if (RegExp(r"play:(.+)").hasMatch(action_id)) {
+        var game = db.Game(body["view"]["private_metadata"]);
+
+        await game.playCard(
+            body["user"]["id"], int.parse(body["actions"][0]["value"]));
+        await game.nextPlayer();
+        await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
+      } else if (action_id == "draw") {
+        var game = db.Game(body["view"]["private_metadata"]);
+        await game.drawTopCard(body["user"]["id"]);
+        await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       }
       break;
     case "view_submission":
