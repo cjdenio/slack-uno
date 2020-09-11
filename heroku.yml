@@ -1,0 +1,7 @@
+build:
+  docker:
+    web: prod.Dockerfile
+setup:
+  addons:
+    - plan: heroku-redis
+      as: REDIS
