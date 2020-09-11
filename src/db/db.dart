@@ -11,6 +11,11 @@ Client client;
 initDatabase() async {
   try {
     client = await Client.connect(Platform.environment["REDIS_URL"]);
+
+    var user = Uri.parse(Platform.environment["REDIS_URL"]).userInfo;
+    if (user != "") {
+      await client.asCommands<String, String>().auth(user.split(":")[1]);
+    }
   } catch (e) {
     print(e);
   }
