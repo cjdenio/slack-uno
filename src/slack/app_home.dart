@@ -66,7 +66,10 @@ updateAppHome(String user) async {
         "blocks": [
           {
             "type": "section",
-            "text": {"type": "mrkdwn", "text": ":tada: <@${winner}> won!"},
+            "text": {
+              "type": "mrkdwn",
+              "text": ":tada: <@${winner}> won the game!!!! :tada:"
+            },
             "accessory": {
               "type": "button",
               "text": {
@@ -114,34 +117,39 @@ updateAppHome(String user) async {
             }
           },
           {
-            "type": "image",
-            "image_url": url.toString(),
-            "alt_text": "stuff",
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "*Your hand:*",
+            }
           },
-          {
-            "type": "header",
-            "text": {"type": "plain_text", "text": "Playable Cards"}
-          },
-          ...playableCards.map<Map<String, dynamic>>((e) => {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": Card.ColorToEmoji(e.value.color) +
-                      " *" +
-                      e.value.number +
-                      "*",
-                },
-                if (user == player.name)
-                  "accessory": {
-                    "type": "button",
-                    "action_id": "play:${e.key}",
-                    "value": e.key.toString(),
-                    "text": {
-                      "type": "plain_text",
-                      "text": "Play Card",
+          {"type": "image", "image_url": url.toString(), "alt_text": "stuff"},
+          if (user == player.name) ...[
+            {
+              "type": "header",
+              "text": {"type": "plain_text", "text": "Playable Cards"}
+            },
+            ...playableCards.map<Map<String, dynamic>>((e) => {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": Card.ColorToEmoji(e.value.color) +
+                        " *" +
+                        e.value.number +
+                        "*",
+                  },
+                  if (user == player.name)
+                    "accessory": {
+                      "type": "button",
+                      "action_id": "play:${e.key}",
+                      "value": e.key.toString(),
+                      "text": {
+                        "type": "plain_text",
+                        "text": "Play Card",
+                      }
                     }
-                  }
-              }),
+                })
+          ],
           if (playableCards.length == 0 && user == player.name)
             {
               "type": "section",
@@ -166,8 +174,8 @@ updateAppHome(String user) async {
                 "type": "mrkdwn",
                 "text": "*Players:* " +
                     players
-                        .map<String>(
-                            (e) => "<@${e.name}> (${e.hand.length} cards)")
+                        .map<String>((e) =>
+                            "${e.name == player.name ? '*' : ''}<@${e.name}>${e.name == player.name ? '*' : ''} (${e.hand.length} cards)")
                         .toList()
                         .join(", "),
               }

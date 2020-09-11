@@ -21,6 +21,17 @@ initDatabase() async {
   }
 }
 
+Future<List<String>> getUsersAlreadyInGame(List<String> users) async {
+  List<String> usersInGame = [];
+  await Future.forEach(users, (u) async {
+    if (await getActiveGame(u) != null) {
+      usersInGame.add(u);
+    }
+  });
+
+  return usersInGame;
+}
+
 Future<String> startGame(String activePlayer, List<String> players) async {
   final gameID = Uuid().v4();
   var deck = Deck();
