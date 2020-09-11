@@ -1,16 +1,18 @@
-import 'package:angel_framework/angel_framework.dart';
-import 'dart:io' show Platform;
 import 'dart:convert';
+import 'dart:io' show Platform;
+
+import 'package:angel_framework/angel_framework.dart';
+
+import '../db/db.dart' as db;
 import '../slack/app_home.dart';
 import '../slack/slack.dart';
-import '../db/db.dart' as db;
 import '../util/util.dart' as util;
 
-handleInteractivity(
+void handleInteractivity(
   RequestContext<dynamic> req,
   ResponseContext<dynamic> res,
 ) async {
-  List<int> rawBody = [];
+  var rawBody = [];
 
   await for (var chunk in req.body) {
     rawBody.addAll(chunk);
@@ -32,21 +34,21 @@ handleInteractivity(
 
   switch (body["type"]) {
     case "block_actions":
-      final action_id = body["actions"][0]["action_id"];
+      final actionID = body["actions"][0]["action_id"];
 
-      if (action_id == "start") {
+      if (actionID == "start") {
         client.openView(body["trigger_id"], startGameModal(null));
-      } else if (action_id == "end") {
+      } else if (actionID == "end") {
         await db.Game(body["view"]["private_metadata"]).end();
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
-      } else if (RegExp(r"play:(.+)").hasMatch(action_id)) {
+      } else if (RegExp(r"play:(.+)").hasMatch(actionID)) {
         var game = db.Game(body["view"]["private_metadata"]);
 
         await game.playCard(
             body["user"]["id"], int.parse(body["actions"][0]["value"]));
         await game.nextPlayer();
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
-      } else if (action_id == "draw") {
+      } else if (actionID == "draw") {
         var game = db.Game(body["view"]["private_metadata"]);
         await game.drawTopCard(body["user"]["id"]);
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
@@ -64,6 +66,7 @@ handleInteractivity(
             res.json({
               "response_action": "update",
               "view": startGameModal(
+                  // ignore: lines_longer_than_80_chars, prefer_interpolation_to_compose_strings
                   "The following people are currently playing Uno, and thus can't be added to a game: " +
                       alreadyPlaying.map((e) => "<@$e>").join(", ")),
             });
@@ -72,10 +75,12 @@ handleInteractivity(
             res.json({
               "response_action": "update",
               "view": startGameModal(
+                  // ignore: lines_longer_than_80_chars
                   "No need to select yourself; you'll automatically be added in."),
             });
           } else {
             print(
+                // ignore: lines_longer_than_80_chars
                 "Starting game with ${values['players']['players']['selected_users'].length} players");
             var gameID = await db.startGame(
               body["user"]["id"],
@@ -90,6 +95,7 @@ handleInteractivity(
                     "text": {
                       "type": "mrkdwn",
                       "text":
+                          // ignore: lines_longer_than_80_chars, prefer_interpolation_to_compose_strings
                           "<@${body['user']['id']}> has invited you to play Uno with these people: " +
                               values['players']['players']['selected_users']
                                   .map((e) => "<@$e>")
@@ -159,7 +165,7 @@ Map<String, dynamic> startGameModal(String error) {
           "elements": [
             {
               "type": "mrkdwn",
-              "text": ":rotating_light: *" + error + "* :rotating_light:",
+              "text": ":rotating_light: *$error* :rotating_light:",
             }
           ]
         }

@@ -6,3 +6,5 @@ dependencies:
   dartis: ^0.5.0
   uuid: ^2.2.2
   crypto: ^2.1.5
+dev_dependencies:
+  effective_dart: ^1.0.0

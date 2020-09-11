@@ -24,7 +24,7 @@ class Deck {
   }
 
   List<Card> dealOutCards(int number) {
-    List<Card> hand = [];
+    var hand = [];
 
     for (var i = 0; i < number; i++) {
       hand.add(cards.removeLast());
@@ -59,17 +59,17 @@ class Card {
   }
 
   String toString() {
-    return color.toString() + " " + number.toString();
+    return "${color.toString()} ${number.toString()}";
   }
 
   Map<String, String> toJson() {
     return {
-      "color": ColorToString(this.color),
-      "number": this.number,
+      "color": colorToString(color),
+      "number": number,
     };
   }
 
-  static String ColorToString(Color color) {
+  static String colorToString(Color color) {
     switch (color) {
       case Color.red:
         return "red";
@@ -84,7 +84,7 @@ class Card {
     }
   }
 
-  static String ColorToEmoji(Color color) {
+  static String colorToEmoji(Color color) {
     switch (color) {
       case Color.red:
         return ":red_circle:";

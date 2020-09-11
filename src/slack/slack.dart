@@ -1,5 +1,6 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
+
+import 'package:http/http.dart' as http;
 
 class SlackClient {
   final String token;
@@ -16,12 +17,12 @@ class SlackClient {
   }
 
   Future<Map<String, dynamic>> openView(
-    String trigger_id,
+    String triggerID,
     Map<String, dynamic> view,
   ) async {
     return await _doRequestJson(
       "https://slack.com/api/views.open",
-      {"trigger_id": trigger_id, "view": view},
+      {"trigger_id": triggerID, "view": view},
     );
   }
 
@@ -43,7 +44,7 @@ class SlackClient {
     var client = http.Client();
     var req = http.Request("POST", Uri.parse(url));
 
-    req.headers["Authorization"] = "Bearer ${this.token}";
+    req.headers["Authorization"] = "Bearer $token";
     req.headers["Content-Type"] = "application/json";
     req.body = json.encode(data);
 

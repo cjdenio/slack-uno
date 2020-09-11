@@ -1,13 +1,13 @@
+import 'dart:io' show Platform;
+
 import 'package:angel_framework/angel_framework.dart';
 import 'package:angel_framework/http.dart';
 
+import '../src/db/db.dart';
 import '../src/handlers/events.dart';
 import '../src/handlers/interactivity.dart';
-import '../src/db/db.dart';
 
-import 'dart:io' show Platform;
-
-main() async {
+void main() async {
   await initDatabase();
 
   var app = Angel();
