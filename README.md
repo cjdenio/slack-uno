@@ -4,4 +4,4 @@
 
 This game works, but most features are still WIP.
 
-![](https://cloud-91teem7y4.vercel.app/image__9_.png)
+![](https://cloud-cfqwrizot.vercel.app/image.png)
