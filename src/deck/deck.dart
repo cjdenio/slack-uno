@@ -24,7 +24,7 @@ class Deck {
   }
 
   List<Card> dealOutCards(int number) {
-    var hand = [];
+    var hand = <Card>[];
 
     for (var i = 0; i < number; i++) {
       hand.add(cards.removeLast());

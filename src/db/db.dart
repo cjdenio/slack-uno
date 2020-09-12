@@ -23,7 +23,7 @@ void initDatabase() async {
 }
 
 Future<List<String>> getUsersAlreadyInGame(List<String> users) async {
-  var usersInGame = [];
+  var usersInGame = <String>[];
   await Future.forEach(users, (u) async {
     if (await getActiveGame(u) != null) {
       usersInGame.add(u);
@@ -107,7 +107,7 @@ class Game {
             .get("games:$game:players"))
         .cast<String>();
 
-    var newList = [];
+    var newList = <Player>[];
 
     await Future.forEach(players, (player) async {
       newList.add(Player(name: player, hand: await getPlayerHand(player)));
@@ -183,11 +183,46 @@ class Game {
     return await client.asCommands<String, String>().get("games:$game:winner");
   }
 
+  void resetDeck() async {
+    var discard = json
+        .decode(await client
+            .asCommands<String, String>()
+            .get("games:$game:discard"))
+        .map((e) => Card.fromJson(e))
+        .toList() as List;
+
+    // Remove the top card from the discard pile
+    var topCard = discard.removeLast();
+
+    // Shuffle the discard pile
+    discard.shuffle();
+
+    // Set the draw pile to the shuffled discard pile
+    await client
+        .asCommands<String, String>()
+        .set("games:$game:draw", json.encode(discard));
+    // Put the top card back in the discard pile
+    await client
+        .asCommands<String, String>()
+        .set("games:$game:discard", json.encode([topCard]));
+  }
+
   Future<Card> drawTopCard(String user) async {
     var hand = await getPlayerHand(user);
-    dynamic draw = json.decode(
-        await client.asCommands<String, String>().get("games:$game:draw"));
-    draw = draw.map((e) => Card.fromJson(e)).toList();
+    var draw = json
+        .decode(
+            await client.asCommands<String, String>().get("games:$game:draw"))
+        .map((e) => Card.fromJson(e))
+        .toList() as List;
+
+    if (draw.length == 0) {
+      await resetDeck();
+      draw = json
+          .decode(
+              await client.asCommands<String, String>().get("games:$game:draw"))
+          .map((e) => Card.fromJson(e))
+          .toList() as List;
+    }
 
     var drawn = draw.removeLast();
     hand.add(drawn);

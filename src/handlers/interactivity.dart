@@ -12,7 +12,7 @@ void handleInteractivity(
   RequestContext<dynamic> req,
   ResponseContext<dynamic> res,
 ) async {
-  var rawBody = [];
+  var rawBody = <int>[];
 
   await for (var chunk in req.body) {
     rawBody.addAll(chunk);
