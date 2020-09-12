@@ -10,15 +10,22 @@ Client client;
 
 void initDatabase() async {
   try {
+    print("Connecting...");
+
     client = await Client.connect(Platform.environment["REDIS_URL"]);
 
     var user = Uri.parse(Platform.environment["REDIS_URL"]).userInfo;
     if (user != "") {
       await client.asCommands<String, String>().auth(user.split(":")[1]);
     }
+
+    print("Successfully connected to Redis!");
+
     // ignore: avoid_catches_without_on_clauses
   } catch (e) {
-    print(e);
+    print("Failed to connect to Redis, retrying in 5 seconds...");
+    await Future.delayed(Duration(seconds: 5));
+    await initDatabase();
   }
 }
 
