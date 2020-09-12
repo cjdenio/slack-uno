@@ -4,8 +4,9 @@ import 'package:angel_framework/angel_framework.dart';
 import '../slack/app_home.dart';
 import '../util/util.dart' as util;
 
-handleEvents(RequestContext<dynamic> req, ResponseContext<dynamic> res) async {
-  List<int> rawBody = [];
+void handleEvents(
+    RequestContext<dynamic> req, ResponseContext<dynamic> res) async {
+  var rawBody = [];
 
   await for (var chunk in req.body) {
     rawBody.addAll(chunk);

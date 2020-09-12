@@ -1,17 +1,18 @@
+import 'dart:convert';
+import 'dart:io' show Platform;
+
+import '../db/db.dart' as db;
 import '../deck/deck.dart';
 import 'slack.dart';
-import 'dart:io' show Platform;
-import '../db/db.dart' as db;
-import 'dart:convert';
 
-updateAppHomeForAllInGame(String gameID) async {
+void updateAppHomeForAllInGame(String gameID) async {
   var players = await db.Game(gameID).getPlayers();
   await Future.forEach<db.Player>(players, (e) async {
     await updateAppHome(e.name);
   });
 }
 
-updateAppHome(String user) async {
+void updateAppHome(String user) async {
   var client = SlackClient(Platform.environment["SLACK_TOKEN"]);
 
   final activeGame = await db.getActiveGame(user);
@@ -68,7 +69,7 @@ updateAppHome(String user) async {
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": ":tada: <@${winner}> won the game!!!! :tada:"
+              "text": ":tada: <@$winner> won the game!!!! :tada:"
             },
             "accessory": {
               "type": "button",
@@ -108,6 +109,7 @@ updateAppHome(String user) async {
                 "text": {
                   "type": "plain_text",
                   "text":
+                      // ignore: lines_longer_than_80_chars
                       "Are you sure you'd like to end this game for all players?"
                 },
                 "confirm": {"type": "plain_text", "text": "End"},
@@ -133,10 +135,9 @@ updateAppHome(String user) async {
                   "type": "section",
                   "text": {
                     "type": "mrkdwn",
-                    "text": Card.ColorToEmoji(e.value.color) +
-                        " *" +
-                        e.value.number +
-                        "*",
+                    "text":
+                        // ignore: lines_longer_than_80_chars
+                        "${Card.colorToEmoji(e.value.color)} *${e.value.number}*",
                   },
                   if (user == player.name)
                     "accessory": {
@@ -156,6 +157,7 @@ updateAppHome(String user) async {
               "text": {
                 "type": "mrkdwn",
                 "text":
+                    // ignore: lines_longer_than_80_chars
                     "*You have no playable cards.* Click over there to draw one :arrow_right:"
               },
               "accessory": {
@@ -172,9 +174,11 @@ updateAppHome(String user) async {
             "elements": [
               {
                 "type": "mrkdwn",
+                // ignore: prefer_interpolation_to_compose_strings
                 "text": "*Players:* " +
                     players
                         .map<String>((e) =>
+                            // ignore: lines_longer_than_80_chars
                             "${e.name == player.name ? '*' : ''}<@${e.name}>${e.name == player.name ? '*' : ''} (${e.hand.length} cards)")
                         .toList()
                         .join(", "),
