@@ -1,0 +1,12 @@
+name: Lint
+on:
+  - push
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    container:
+      image: google/dart:latest
+    steps:
+      - uses: "actions/checkout@v2"
+      - run: "dartanalyzer --fatal-infos --fatal-warnings ."
