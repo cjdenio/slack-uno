@@ -39,14 +39,13 @@ void handleInteractivity(
       if (actionID == "start") {
         client.openView(body["trigger_id"], startGameModal(null));
       } else if (actionID == "end") {
-        await db.Game(body["view"]["private_metadata"]).end();
+        await db.Game(body["view"]["private_metadata"]).end(body["user"]["id"]);
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       } else if (RegExp(r"play:(.+)").hasMatch(actionID)) {
         var game = db.Game(body["view"]["private_metadata"]);
 
         await game.playCard(
             body["user"]["id"], int.parse(body["actions"][0]["value"]));
-        await game.nextPlayer();
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       } else if (actionID == "draw") {
         var game = db.Game(body["view"]["private_metadata"]);
@@ -87,10 +86,44 @@ void handleInteractivity(
             print(
                 // ignore: lines_longer_than_80_chars
                 "Starting game with ${values['players']['players']['selected_users'].length} players");
-            var gameID = await db.startGame(
-              body["user"]["id"],
-              values['players']['players']['selected_users'].cast<String>(),
-            );
+
+            var players = [
+              ...values['players']['players']['selected_users'],
+              body["user"]["id"]
+            ].map((e) => "<@$e>").toList().join(", ");
+
+            var gameID = "";
+
+            if (values["channel"]["channel"]["selected_channel"] != null) {
+              print("there was a channel");
+              var message = await client.postMessage(
+                channel: values["channel"]["channel"]["selected_channel"],
+                blocks: [
+                  {
+                    "type": "section",
+                    "text": {
+                      "type": "mrkdwn",
+                      "text":
+                          // ignore: lines_longer_than_80_chars
+                          "An Uno game was just started with the following players: $players\nI'll post game updates in a thread right here! :arrow_right:",
+                    }
+                  }
+                ],
+              );
+
+              gameID = await db.startGame(
+                body["user"]["id"],
+                values['players']['players']['selected_users'].cast<String>(),
+                channel: values["channel"]["channel"]["selected_channel"],
+                ts: message["ts"],
+              );
+            } else {
+              gameID = await db.startGame(
+                  body["user"]["id"],
+                  values['players']['players']['selected_users']
+                      .cast<String>());
+            }
+
             await updateAppHomeForAllInGame(gameID);
             await util.sendDmToAllInGame(
                 gameID,
@@ -173,7 +206,32 @@ Map<String, dynamic> startGameModal(String error) {
               "text": ":rotating_light: *$error* :rotating_light:",
             }
           ]
+        },
+      {
+        "type": "input",
+        "optional": true,
+        "label": {
+          "type": "plain_text",
+          "text": "Share to Channel",
+        },
+        "block_id": "channel",
+        "element": {
+          "type": "channels_select",
+          "placeholder": {"type": "plain_text", "text": "Select one..."},
+          "action_id": "channel"
         }
+      },
+      {
+        "type": "context",
+        "elements": [
+          {
+            "type": "mrkdwn",
+            "text":
+                // ignore: lines_longer_than_80_chars
+                "I'll post (threaded) game updates into this channel, like notifying people when it's their turn."
+          }
+        ]
+      }
     ],
     "submit": {
       "type": "plain_text",

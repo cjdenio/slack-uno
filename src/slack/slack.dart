@@ -26,8 +26,12 @@ class SlackClient {
     );
   }
 
-  Future<Map<String, dynamic>> postMessage(
-      {String channel, String text, List<Map<String, dynamic>> blocks}) async {
+  Future<Map<String, dynamic>> postMessage({
+    String channel,
+    String text,
+    List<Map<String, dynamic>> blocks,
+    String threadTS,
+  }) async {
     assert(channel != null, "Please provide a channel.");
     assert(text != null || blocks != null,
         "Please provide either text or blocks.");
@@ -35,7 +39,8 @@ class SlackClient {
     return await _doRequestJson("https://slack.com/api/chat.postMessage", {
       "channel": channel,
       if (text != null) "text": text,
-      if (blocks != null) "blocks": blocks
+      if (blocks != null) "blocks": blocks,
+      if (threadTS != null) "thread_ts": threadTS
     });
   }
 

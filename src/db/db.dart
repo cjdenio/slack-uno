@@ -5,6 +5,7 @@ import 'package:dartis/dartis.dart';
 import 'package:uuid/uuid.dart';
 
 import '../deck/deck.dart';
+import '../slack/slack.dart';
 
 Client client;
 
@@ -40,7 +41,12 @@ Future<List<String>> getUsersAlreadyInGame(List<String> users) async {
   return usersInGame;
 }
 
-Future<String> startGame(String activePlayer, List<String> players) async {
+Future<String> startGame(
+  String activePlayer,
+  List<String> players, {
+  String channel,
+  String ts,
+}) async {
   final gameID = Uuid().v4();
   var deck = Deck();
 
@@ -68,6 +74,11 @@ Future<String> startGame(String activePlayer, List<String> players) async {
   await commands.set("games:$gameID:activePlayer", activePlayer);
   await commands.set(
       "games:$gameID:activeColor", Card.colorToString(starterCard.color));
+
+  if (ts != null && channel != null) {
+    await commands.set("games:$gameID:channel", channel);
+    await commands.set("games:$gameID:ts", ts);
+  }
 
   return gameID;
 }
@@ -142,20 +153,44 @@ class Game {
     var players = await getPlayers();
     var activePlayer = await getActivePlayer();
 
+    var newPlayer = "";
+
     if (activePlayer.name == players.last.name) {
-      await setActivePlayer(players.first.name);
+      newPlayer = players.first.name;
     } else {
-      await setActivePlayer(
+      newPlayer =
           players[players.indexWhere((e) => e.name == activePlayer.name) + 1]
-              .name);
+              .name;
     }
+
+    await setActivePlayer(newPlayer);
+
+    await postToUpdatesThread([
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "<@$newPlayer>, it's your turn!",
+        }
+      }
+    ]);
   }
 
-  void end() async {
+  void end(String whoEnded) async {
     var players = await getPlayers();
     Future.forEach<Player>(players, (e) async {
       await removeActiveGame(e.name);
     });
+
+    await postToUpdatesThread([
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text": "<@$whoEnded> ended this game.",
+        }
+      }
+    ]);
   }
 
   void playCard(String user, int cardIndex) async {
@@ -179,11 +214,24 @@ class Game {
 
     if (hand.length == 0) {
       await setWinner(user);
+    } else {
+      await nextPlayer();
     }
   }
 
   void setWinner(String winner) async {
     await client.asCommands<String, String>().set("games:$game:winner", winner);
+    await postToUpdatesThread([
+      {
+        "type": "section",
+        "text": {
+          "type": "mrkdwn",
+          "text":
+              // ignore: lines_longer_than_80_chars
+              ":tada: Congratulations to <@$winner> for winning the game! :tada:"
+        }
+      }
+    ]);
   }
 
   Future<String> getWinner() async {
@@ -242,6 +290,18 @@ class Game {
         .set("games:$game:players:$user:hand", json.encode(hand));
 
     return drawn;
+  }
+
+  void postToUpdatesThread(List<Map<String, dynamic>> blocks) async {
+    var channel =
+        await client.asCommands<String, String>().get("games:$game:channel");
+    var ts = await client.asCommands<String, String>().get("games:$game:ts");
+
+    var slack = SlackClient(Platform.environment["SLACK_TOKEN"]);
+
+    if (ts != null && channel != null) {
+      await slack.postMessage(blocks: blocks, channel: channel, threadTS: ts);
+    }
   }
 }
 
