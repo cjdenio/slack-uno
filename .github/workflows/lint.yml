@@ -9,4 +9,5 @@ jobs:
       image: google/dart:latest
     steps:
       - uses: "actions/checkout@v2"
+      - run: pub get
       - run: "dartanalyzer --fatal-infos --fatal-warnings ."
