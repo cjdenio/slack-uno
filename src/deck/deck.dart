@@ -69,6 +69,10 @@ class Card {
     };
   }
 
+  bool canBePlayedOn(Card card) {
+    return number == card.number || color == card.color;
+  }
+
   static String colorToString(Color color) {
     switch (color) {
       case Color.red:

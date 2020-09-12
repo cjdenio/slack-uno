@@ -50,7 +50,12 @@ void handleInteractivity(
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       } else if (actionID == "draw") {
         var game = db.Game(body["view"]["private_metadata"]);
-        await game.drawTopCard(body["user"]["id"]);
+        var card = await game.drawTopCard(body["user"]["id"]);
+
+        if (!card.canBePlayedOn(await game.getTopCard())) {
+          await game.nextPlayer();
+        }
+
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       }
       break;
