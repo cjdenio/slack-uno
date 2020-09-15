@@ -1,17 +1,27 @@
 <!-- DO NOT REMOVE - contributor_list:data:start:["cjdenio"]:end -->
+
 # Uno for Slack
 
 > Some say Slack is a communication tool, but I say it's a gaming platform.
 
-This game works, but most features are still WIP.
-
-Image rendering is handled by a separate repo, https://github.com/cjdenio/slack-uno-renderer
+Uno for Slack is fully functional! Feel free to report issues [over here](https://github.com/cjdenio/slack-uno/issues).
 
 ![](https://cloud-cfqwrizot.vercel.app/image.png)
 
-<!-- DO NOT REMOVE - contributor_list:start -->
-## 👥 Contributors
+## Missing Features:
 
+- Skip/Wild cards
+- Leave Game button
+
+### [Project board](https://github.com/cjdenio/slack-uno/projects/1)
+
+---
+
+_Image rendering is handled by a separate repo, https://github.com/cjdenio/slack-uno-renderer_
+
+<!-- DO NOT REMOVE - contributor_list:start -->
+
+## 👥 Contributors
 
 - **[@cjdenio](https://github.com/cjdenio)**
 
