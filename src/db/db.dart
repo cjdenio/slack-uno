@@ -149,18 +149,20 @@ class Game {
         .set("games:$game:activePlayer", player);
   }
 
-  void nextPlayer() async {
+  void nextPlayer({int number = 1}) async {
     var players = await getPlayers();
     var activePlayer = await getActivePlayer();
 
-    var newPlayer = "";
+    var newPlayer = activePlayer.name;
 
-    if (activePlayer.name == players.last.name) {
-      newPlayer = players.first.name;
-    } else {
-      newPlayer =
-          players[players.indexWhere((e) => e.name == activePlayer.name) + 1]
-              .name;
+    for (var i = 0; i < number; i++) {
+      if (newPlayer == players.last.name) {
+        newPlayer = players.first.name;
+      } else {
+        newPlayer =
+            players[players.indexWhere((e) => e.name == activePlayer.name) + 1]
+                .name;
+      }
     }
 
     await setActivePlayer(newPlayer);
@@ -215,7 +217,13 @@ class Game {
     if (hand.length == 0) {
       await setWinner(user);
     } else {
-      await nextPlayer();
+      // Now, check for special cards
+      if (card.number == "skip") {
+        await nextPlayer(number: 2);
+      } else {
+        // It wasn't a special card
+        await nextPlayer();
+      }
     }
   }
 

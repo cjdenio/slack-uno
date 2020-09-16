@@ -18,7 +18,7 @@ void main() async {
   };
 
   app.get('/', (req, res) {
-    res.write("Hello earth!");
+    res.redirect("https://github.com/cjdenio/slack-uno");
   });
   app.post('/slack/events', handleEvents);
   app.post('/slack/interactivity', handleInteractivity);

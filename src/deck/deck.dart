@@ -11,6 +11,7 @@ class Deck {
   Deck() {
     // Loop over all four colors
     for (var i = 0; i < 4; i++) {
+      // Loop through all 10 numbers
       for (var x = 0; x <= 9; x++) {
         cards.add(Card(color: colors[i], number: x.toString()));
         if (x != 0) {
@@ -18,6 +19,10 @@ class Deck {
           cards.add(Card(color: colors[i], number: x.toString()));
         }
       }
+
+      // Add two skips
+      cards.add(Card(color: colors[i], number: "skip"));
+      cards.add(Card(color: colors[i], number: "skip"));
     }
 
     cards.shuffle();
