@@ -10,7 +10,7 @@ Uno for Slack is fully functional! Feel free to report issues [over here](https:
 
 ## Missing Features:
 
-- Skip/Wild cards
+- Wild/Draw 2 cards
 - Leave Game button
 
 ### [Project board](https://github.com/cjdenio/slack-uno/projects/1)
