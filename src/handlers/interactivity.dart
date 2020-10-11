@@ -34,6 +34,8 @@ void handleInteractivity(
 
   switch (body["type"]) {
     case "block_actions":
+      res.write("");
+
       final actionID = body["actions"][0]["action_id"];
 
       if (actionID == "start") {

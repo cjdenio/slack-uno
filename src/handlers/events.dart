@@ -29,6 +29,8 @@ void handleEvents(
     return;
   }
 
+  res.write("");
+
   switch (body["event"]["type"]) {
     case "app_home_opened":
       await updateAppHome(body["event"]["user"]);
