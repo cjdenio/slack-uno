@@ -47,7 +47,7 @@ void handleInteractivity(
       } else if (RegExp(r"play:(.+)").hasMatch(actionID)) {
         var game = db.Game(body["view"]["private_metadata"]);
 
-        if ((await game.getActivePlayer()) != user) {
+        if ((await game.getActivePlayer()).name != user) {
           // Cancel if it's not their turn
           return;
         }
@@ -57,7 +57,7 @@ void handleInteractivity(
       } else if (actionID == "draw") {
         var game = db.Game(body["view"]["private_metadata"]);
 
-        if ((await game.getActivePlayer()) != user) {
+        if ((await game.getActivePlayer()).name != user) {
           // Cancel if it's not their turn
           return;
         }

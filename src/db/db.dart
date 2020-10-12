@@ -163,8 +163,7 @@ class Game {
         newPlayer = players.first.name;
       } else {
         newPlayer =
-            players[players.indexWhere((e) => e.name == activePlayer.name) + 1]
-                .name;
+            players[players.indexWhere((e) => e.name == newPlayer) + 1].name;
       }
 
       iteratedPlayers.add(newPlayer);
