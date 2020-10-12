@@ -125,7 +125,11 @@ void updateAppHome(String user) async {
               "text": "*Your hand:*",
             }
           },
-          {"type": "image", "image_url": url.toString(), "alt_text": "stuff"},
+          {
+            "type": "image",
+            "image_url": url.toString(),
+            "alt_text": "Your hand"
+          },
           if (user == player.name) ...[
             {
               "type": "header",

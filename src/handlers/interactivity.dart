@@ -37,21 +37,32 @@ void handleInteractivity(
       res.write("");
 
       final actionID = body["actions"][0]["action_id"];
+      final user = body["user"]["id"];
 
       if (actionID == "start") {
         client.openView(body["trigger_id"], startGameModal(null));
       } else if (actionID == "end") {
-        await db.Game(body["view"]["private_metadata"]).end(body["user"]["id"]);
+        await db.Game(body["view"]["private_metadata"]).end(user);
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       } else if (RegExp(r"play:(.+)").hasMatch(actionID)) {
         var game = db.Game(body["view"]["private_metadata"]);
 
-        await game.playCard(
-            body["user"]["id"], int.parse(body["actions"][0]["value"]));
+        if ((await game.getActivePlayer()) != user) {
+          // Cancel if it's not their turn
+          return;
+        }
+
+        await game.playCard(user, int.parse(body["actions"][0]["value"]));
         await updateAppHomeForAllInGame(body["view"]["private_metadata"]);
       } else if (actionID == "draw") {
         var game = db.Game(body["view"]["private_metadata"]);
-        var card = await game.drawTopCard(body["user"]["id"]);
+
+        if ((await game.getActivePlayer()) != user) {
+          // Cancel if it's not their turn
+          return;
+        }
+
+        var card = await game.drawTopCard(user);
 
         if (!card.canBePlayedOn(await game.getTopCard())) {
           await game.nextPlayer();
