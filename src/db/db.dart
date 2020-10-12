@@ -149,33 +149,41 @@ class Game {
         .set("games:$game:activePlayer", player);
   }
 
-  void nextPlayer({int number = 1}) async {
+  Future<List<String>> nextPlayer(
+      {int number = 1, bool sendMessage = true}) async {
     var players = await getPlayers();
     var activePlayer = await getActivePlayer();
 
     var newPlayer = activePlayer.name;
+
+    var iteratedPlayers = [];
 
     for (var i = 0; i < number; i++) {
       if (newPlayer == players.last.name) {
         newPlayer = players.first.name;
       } else {
         newPlayer =
-            players[players.indexWhere((e) => e.name == activePlayer.name) + 1]
-                .name;
+            players[players.indexWhere((e) => e.name == newPlayer) + 1].name;
       }
+
+      iteratedPlayers.add(newPlayer);
     }
 
     await setActivePlayer(newPlayer);
 
-    await postToUpdatesThread([
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text": "<@$newPlayer>, it's your turn!",
+    if (sendMessage) {
+      await postToUpdatesThread([
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<@$newPlayer>, it's your turn!",
+          }
         }
-      }
-    ]);
+      ]);
+    }
+
+    return iteratedPlayers.cast<String>();
   }
 
   void end(String whoEnded) async {
@@ -219,7 +227,21 @@ class Game {
     } else {
       // Now, check for special cards
       if (card.number == "skip") {
-        await nextPlayer(number: 2);
+        var iteratedPlayers = await nextPlayer(number: 2, sendMessage: false);
+
+        print(iteratedPlayers);
+
+        await postToUpdatesThread([
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text":
+                  // ignore: lines_longer_than_80_chars
+                  "<@${iteratedPlayers[0]}> was skipped, so *it's <@${iteratedPlayers[1]}>'s turn!*"
+            }
+          }
+        ]);
       } else {
         // It wasn't a special card
         await nextPlayer();
