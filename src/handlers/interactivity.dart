@@ -122,6 +122,9 @@ void handleInteractivity(
                     }
                   }
                 ],
+                text:
+                    // ignore: lines_longer_than_80_chars
+                    "An Uno game was just started with the following players: $players",
               );
 
               gameID = await db.startGame(

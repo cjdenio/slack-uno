@@ -172,15 +172,18 @@ class Game {
     await setActivePlayer(newPlayer);
 
     if (sendMessage) {
-      await postToUpdatesThread([
-        {
-          "type": "section",
-          "text": {
-            "type": "mrkdwn",
-            "text": "<@$newPlayer>, it's your turn!",
+      await postToUpdatesThread(
+        [
+          {
+            "type": "section",
+            "text": {
+              "type": "mrkdwn",
+              "text": "<@$newPlayer>, it's your turn!",
+            }
           }
-        }
-      ]);
+        ],
+        text: "<@$newPlayer>, it's your turn!",
+      );
     }
 
     return iteratedPlayers.cast<String>();
@@ -192,15 +195,18 @@ class Game {
       await removeActiveGame(e.name);
     });
 
-    await postToUpdatesThread([
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text": "<@$whoEnded> ended this game.",
+    await postToUpdatesThread(
+      [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "<@$whoEnded> ended this game.",
+          }
         }
-      }
-    ]);
+      ],
+      text: "<@$whoEnded> ended this game.",
+    );
   }
 
   void playCard(String user, int cardIndex) async {
@@ -231,17 +237,22 @@ class Game {
 
         print(iteratedPlayers);
 
-        await postToUpdatesThread([
-          {
-            "type": "section",
-            "text": {
-              "type": "mrkdwn",
-              "text":
-                  // ignore: lines_longer_than_80_chars
-                  "<@${iteratedPlayers[0]}> was skipped, so *it's <@${iteratedPlayers[1]}>'s turn!*"
+        await postToUpdatesThread(
+          [
+            {
+              "type": "section",
+              "text": {
+                "type": "mrkdwn",
+                "text":
+                    // ignore: lines_longer_than_80_chars
+                    "<@${iteratedPlayers[0]}> was skipped, so *it's <@${iteratedPlayers[1]}>'s turn!*"
+              }
             }
-          }
-        ]);
+          ],
+          text:
+              // ignore: lines_longer_than_80_chars
+              "<@${iteratedPlayers[0]}> was skipped, so *it's <@${iteratedPlayers[1]}>'s turn!*",
+        );
       } else {
         // It wasn't a special card
         await nextPlayer();
@@ -251,17 +262,20 @@ class Game {
 
   void setWinner(String winner) async {
     await client.asCommands<String, String>().set("games:$game:winner", winner);
-    await postToUpdatesThread([
-      {
-        "type": "section",
-        "text": {
-          "type": "mrkdwn",
-          "text":
-              // ignore: lines_longer_than_80_chars
-              ":tada: Congratulations to <@$winner> for winning the game! :tada:"
+    await postToUpdatesThread(
+      [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text":
+                // ignore: lines_longer_than_80_chars
+                ":tada: Congratulations to <@$winner> for winning the game! :tada:"
+          }
         }
-      }
-    ]);
+      ],
+      text: ":tada: Congratulations to <@$winner> for winning the game! :tada:",
+    );
   }
 
   Future<String> getWinner() async {
@@ -322,7 +336,8 @@ class Game {
     return drawn;
   }
 
-  void postToUpdatesThread(List<Map<String, dynamic>> blocks) async {
+  void postToUpdatesThread(List<Map<String, dynamic>> blocks,
+      {String text}) async {
     var channel =
         await client.asCommands<String, String>().get("games:$game:channel");
     var ts = await client.asCommands<String, String>().get("games:$game:ts");
@@ -330,7 +345,12 @@ class Game {
     var slack = SlackClient(Platform.environment["SLACK_TOKEN"]);
 
     if (ts != null && channel != null) {
-      await slack.postMessage(blocks: blocks, channel: channel, threadTS: ts);
+      await slack.postMessage(
+        blocks: blocks,
+        channel: channel,
+        threadTS: ts,
+        text: text,
+      );
     }
   }
 }
