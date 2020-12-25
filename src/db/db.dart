@@ -5,8 +5,8 @@ import 'package:dartis/dartis.dart';
 import 'package:uuid/uuid.dart';
 
 import '../deck/deck.dart';
-import '../slack/slack.dart';
 import '../hn/hn.dart';
+import '../slack/slack.dart';
 import '../util/util.dart' as util;
 
 Client client;
