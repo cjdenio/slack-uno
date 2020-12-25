@@ -5,7 +5,9 @@ import 'package:dartis/dartis.dart';
 import 'package:uuid/uuid.dart';
 
 import '../deck/deck.dart';
+import '../hn/hn.dart';
 import '../slack/slack.dart';
+import '../util/util.dart' as util;
 
 Client client;
 
@@ -262,19 +264,49 @@ class Game {
 
   void setWinner(String winner) async {
     await client.asCommands<String, String>().set("games:$game:winner", winner);
+
+    var slack = SlackClient(Platform.environment["SLACK_TOKEN"]);
+
+    var text =
+        // ignore: lines_longer_than_80_chars
+        ":tada: Congratulations to <@$winner> for winning the game! :tada:";
+
+    // Award some ‡ if desired
+    if (Platform.environment["HN_TOKEN"] != null) {
+      try {
+        await giveHn(await util.getBotUserID(), winner, 5);
+        text =
+            // ignore: lines_longer_than_80_chars
+            ":tada: Congratulations to <@$winner> for winning the game and receiving 5‡! :tada:";
+        slack.postMessage(
+          channel: winner,
+          text:
+              // ignore: lines_longer_than_80_chars
+              "Congratulations for winning an Uno game! :tada: I've just sent 5‡ your way.",
+        );
+        // ignore: avoid_catches_without_on_clauses
+      } catch (e) {
+        slack.postMessage(
+          channel: winner,
+          text:
+              // ignore: lines_longer_than_80_chars
+              "Congratulations for winning an Uno game! :tada: Sadly, something went wrong while sending you your 5‡; I may have run out. :cry:",
+        );
+      }
+    }
+
+    // Post the message
     await postToUpdatesThread(
       [
         {
           "type": "section",
           "text": {
             "type": "mrkdwn",
-            "text":
-                // ignore: lines_longer_than_80_chars
-                ":tada: Congratulations to <@$winner> for winning the game! :tada:"
+            "text": text,
           }
         }
       ],
-      text: ":tada: Congratulations to <@$winner> for winning the game! :tada:",
+      text: text,
     );
   }
 

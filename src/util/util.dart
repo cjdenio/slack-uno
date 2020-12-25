@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io' show Platform;
 
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
 
 import '../db/db.dart' as db;
 import '../slack/slack.dart';
@@ -27,4 +28,13 @@ bool verifySlackRequest(String timestamp, List<int> body, String signature) {
   var digest = hmac.convert(utf8.encode("v0:$timestamp:${utf8.decode(body)}"));
 
   return "v0=${digest.toString()}" == signature;
+}
+
+Future<String> getBotUserID() async {
+  var resp = await http.get(Uri.https("slack.com", "/api/auth.test",
+      {"token": Platform.environment["SLACK_TOKEN"]}));
+
+  var respJson = json.decode(resp.body);
+
+  return respJson["user_id"];
 }
