@@ -8,7 +8,6 @@ Future<void> giveHn(String botUserId, String user, int amount) async {
   var request = http.Request("POST", Uri.parse("https://hn.rishi.cx"));
 
   request.headers["secret"] = Platform.environment["HN_TOKEN"];
-  print(Platform.environment["HN_TOKEN"]);
 
   request.headers["Content-Type"] = "application/json";
 
@@ -17,14 +16,19 @@ Future<void> giveHn(String botUserId, String user, int amount) async {
       mutation(\$botUserId: String!, \$user: String!, \$amount: Float!) {
         send(data: {from: \$botUserId, to: \$user, balance: \$amount}) {
           id
-        } 
-      } 
+        }
+      }
     """,
-    "variables": {"botUserId": botUserId, "user": user, "amount": amount}
+    "variables": {"botUserId": botUserId, "user": user, "amount": amount},
   });
 
   var res = await client.send(request);
   var resString = await res.stream.bytesToString();
+  var resJson = json.decode(resString);
 
-  print(resString);
+  if (res.statusCode < 200 ||
+      res.statusCode > 299 ||
+      resJson["errors"] != null) {
+    throw resJson;
+  }
 }
