@@ -31,7 +31,8 @@ bool verifySlackRequest(String timestamp, List<int> body, String signature) {
 }
 
 Future<String> getBotUserID() async {
-  var resp = await http.get(Uri.https("slack.com", "/api/auth.test", {"token": Platform.environment["SLACK_TOKEN"]}));
+  var resp = await http.get(Uri.https("slack.com", "/api/auth.test",
+      {"token": Platform.environment["SLACK_TOKEN"]}));
 
   var respJson = json.decode(resp.body);
 
