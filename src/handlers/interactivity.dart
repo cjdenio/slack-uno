@@ -101,8 +101,8 @@ void handleInteractivity(
                 "Starting game with ${values['players']['players']['selected_users'].length} players");
 
             var players = [
+              body["user"]["id"],
               ...values['players']['players']['selected_users'],
-              body["user"]["id"]
             ].map((e) => "<@$e>").toList().join(", ");
 
             var gameID = "";
